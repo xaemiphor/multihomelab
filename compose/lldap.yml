@@ -1,0 +1,52 @@
+# TZ
+# LLDAP_DOMAIN
+# LLDAP_JWT_SECRET
+# LLDAP_KEY_SEED
+# LLDAP_LDAP_BASE_DN
+# LLDAP_UID
+# LLDAP_GID
+version: "3"
+
+services:
+  lldap:
+    image: lldap/lldap:stable
+      #ports:
+      # For LDAP, not recommended to expose, see Usage section.
+      #- "3890:3890"
+      # For LDAPS (LDAP Over SSL), enable port if LLDAP_LDAPS_OPTIONS__ENABLED set true, look env below
+      #- "6360:6360"
+      # For the web front-end
+      #- "17170:17170"
+    volumes:
+      - "/srv/config/lldap/certs:/certs"
+      - "/srv/data/lldap:/data"
+    environment:
+      - UID=${LLDAP_UID:-1000}
+      - GID=${LLDAP_GID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+      - LLDAP_JWT_SECRET=${LLDAP_JWT_SECRET}
+      - LLDAP_KEY_SEED=${LLDAP_KEY_SEED}
+      - LLDAP_LDAP_BASE_DN=${LLDAP_LDAP_BASE_DN:-dc=example,dc=com}
+      # If using LDAPS, set enabled true and configure cert and key path
+      # - LLDAP_LDAPS_OPTIONS__ENABLED=true
+      # - LLDAP_LDAPS_OPTIONS__CERT_FILE=/certs/certfile.crt
+      # - LLDAP_LDAPS_OPTIONS__KEY_FILE=/certs/keyfile.key
+      # You can also set a different database:
+      # - LLDAP_DATABASE_URL=mysql://mysql-user:password@mysql-server/my-database
+      # - LLDAP_DATABASE_URL=postgres://postgres-user:password@postgres-server/my-database
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lldap-https.entrypoints=websecure"
+      - "traefik.http.routers.lldap-https.priority=201"
+      - "traefik.http.routers.lldap-https.rule=(Host(`${LLDAP_DOMAIN}`))"
+      - "traefik.http.routers.lldap-https.service=lldap"
+      - "traefik.http.routers.lldap-https.tls=true"
+      - "traefik.http.routers.lldap-https.tls.certresolver=le"
+      - "traefik.http.services.lldap.loadbalancer.server.port=17170"
+      - "traefik.http.services.lldap.loadbalancer.server.scheme=http"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: 5
+        max-size: 10m
+

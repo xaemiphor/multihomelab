@@ -1,0 +1,61 @@
+version: '3.4'
+
+services:
+  traefik:
+    restart: always
+    image: traefik:v2.10
+    ports:
+      - "80:80"
+      - "443:443"
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /srv/config/traefik/cfg:/config
+      - /srv/config/traefik/acme:/acme
+      - /srv/log/traefik:/var/log
+    command:
+# Listen on 80/443
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.web.forwardedHeaders.trustedIPs=127.0.0.1/32,172.16.0.0/12"
+      - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.websecure.forwardedHeaders.trustedIPs=127.0.0.1/32,172.16.0.0/12"
+
+# CFG sources
+      - "--providers.file.watch=true"
+      - "--providers.file.directory=/config"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+
+# Redirect http to https
+      - "--entryPoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
+
+      - "--serverstransport.insecureskipverify=true"
+      - "--log.level=${TRAEFIK_DEBUG:-ERROR}"
+      - "--log.filePath=/var/log/traefik.log"
+
+# DNS and Wildcard
+# Moved to file config in /srv/config/traefik/cfg/
+#      - "--certificatesResolvers.le.acme.storage=/acme/acme.json"
+#      - "--certificatesResolvers.le.acme.email=${TRAEFIK_LETSENCRYPT_EMAIL}"
+#      - "--certificatesResolvers.le.acme.httpChallenge.entryPoint=web"
+
+# Healthcheck
+      - "--ping=true"
+      - "--ping.entryPoint=ping"
+      - "--entryPoints.ping.address=:8082"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+    healthcheck:
+      interval: "30s"
+      start_period: "5m"
+      test: ["CMD", "traefik", "healthcheck", "--entryPoints.ping.address=:8082", "--ping.entryPoint=ping"]
+      timeout: "3s"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: 5
+        max-size: 10m
+
