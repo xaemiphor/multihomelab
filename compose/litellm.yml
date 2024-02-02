@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    command: --port ${LITELLM_PORT:-8000} --num_workers 2 --config /config/config.yml --debug
+    ports:
+      - ${LITELLM_PORT:-8000}:${LITELLM_PORT:-8000}
+    restart: unless-stopped
+    volumes:
+      - /srv/config/litellm:/config
+      - /srv/data/litellm:/data
