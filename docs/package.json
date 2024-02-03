@@ -19,6 +19,6 @@
   },
   "homepage": "https://github.com/xaemiphor/homelab#readme",
   "devDependencies": {
-    "docsify-cli": "^4.13.1"
+    "docsify-cli": "^4.4.4"
   }
 }
