@@ -10,13 +10,13 @@ version: "3"
 services:
   lldap:
     image: lldap/lldap:stable
-      #ports:
+    ports:
       # For LDAP, not recommended to expose, see Usage section.
       #- "3890:3890"
       # For LDAPS (LDAP Over SSL), enable port if LLDAP_LDAPS_OPTIONS__ENABLED set true, look env below
       #- "6360:6360"
       # For the web front-end
-      #- "17170:17170"
+      #- "${LLDAP_HTTP_PORT:-17170}:${LLDAP_HTTP_PORT:-17170}"
     volumes:
       - "/srv/config/lldap/certs:/certs"
       - "/srv/data/lldap:/data"
@@ -27,6 +27,7 @@ services:
       - LLDAP_JWT_SECRET=${LLDAP_JWT_SECRET}
       - LLDAP_KEY_SEED=${LLDAP_KEY_SEED}
       - LLDAP_LDAP_BASE_DN=${LLDAP_LDAP_BASE_DN:-dc=example,dc=com}
+      - LLDAP_HTTP_PORT=${LLDAP_HTTP_PORT:-17170}
       # If using LDAPS, set enabled true and configure cert and key path
       # - LLDAP_LDAPS_OPTIONS__ENABLED=true
       # - LLDAP_LDAPS_OPTIONS__CERT_FILE=/certs/certfile.crt
@@ -42,7 +43,7 @@ services:
       - "traefik.http.routers.lldap-https.service=lldap"
       - "traefik.http.routers.lldap-https.tls=true"
       - "traefik.http.routers.lldap-https.tls.certresolver=le"
-      - "traefik.http.services.lldap.loadbalancer.server.port=17170"
+      - "traefik.http.services.lldap.loadbalancer.server.port=${LLDAP_HTTP_PORT:-17170}"
       - "traefik.http.services.lldap.loadbalancer.server.scheme=http"
     logging:
       driver: "json-file"
