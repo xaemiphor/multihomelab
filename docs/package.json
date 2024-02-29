@@ -1,5 +1,5 @@
 {
-  "name": "homelab",
+  "name": "multihomelab",
   "version": "0.0.0",
   "description": "Welcome to the Homelab site!",
   "main": "index.js",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xaemihpor/homelab.git"
+    "url": "git+https://github.com/xaemihpor/multihomelab.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/xaemiphor/homelab/issues"
+    "url": "https://github.com/xaemiphor/multihomelab/issues"
   },
-  "homepage": "https://github.com/xaemiphor/homelab#readme",
+  "homepage": "https://github.com/xaemiphor/multihomelab#readme",
   "devDependencies": {
     "docsify-cli": "^4.4.4"
   }
